@@ -8,22 +8,107 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<main class="template-page">
-<header class="template-header">
-  <div>
-    <p class="eyebrow">BARANGAY MANAGEMENT</p>
-    <h1>Barangay Document Templates</h1>
-    <p class="muted">Download editable document templates for common barangay transactions.</p>
-  </div>
-  <a class="btn" href="index.html">← Back to Dashboard</a>
-</header>
-<section class="template-grid">
-  <article class="template-card"><div class="template-icon">▣</div><div><span class="template-type">Certificate</span><h2>Barangay Clearance</h2><p>Basic clearance template with resident and purpose fields.</p><a class="btn primary" download href="templates/barangay-clearance-template.txt">Download Template</a></div></article>
-  <article class="template-card"><div class="template-icon">▤</div><div><span class="template-type">Certificate</span><h2>Certificate of Residency</h2><p>Template for confirming a resident's barangay residency.</p><a class="btn primary" download href="templates/certificate-of-residency-template.txt">Download Template</a></div></article>
-  <article class="template-card"><div class="template-icon">▤</div><div><span class="template-type">Certificate</span><h2>Certificate of Indigency</h2><p>Basic template for requests involving financial assistance.</p><a class="btn primary" download href="templates/certificate-of-indigency-template.txt">Download Template</a></div></article>
-  <article class="template-card"><div class="template-icon">▣</div><div><span class="template-type">Clearance</span><h2>Barangay Business Clearance</h2><p>Template for documenting a barangay business clearance request.</p><a class="btn primary" download href="templates/business-clearance-template.txt">Download Template</a></div></article>
-</section>
-<div class="template-note"><strong>Note:</strong> These are general editable templates. Review them against your barangay's current requirements, local forms, fees, and applicable regulations before official use.</div>
-</main>
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="logo sm">BM</div><div><b>Barangay MIS</b><small>Admin Portal</small></div></div>
+    <nav>
+      <a class="nav-link" href="index.html">⌂ <span>Dashboard</span></a>
+      <a class="nav-link" href="index.html">◉ <span>Residents</span></a>
+      <a class="nav-link" href="index.html">⌂ <span>Households</span></a>
+      <a class="nav-link" href="index.html">▣ <span>Documents</span></a>
+      <a class="nav-link" href="index.html">♟ <span>Officials</span></a>
+      <a class="nav-link" href="index.html">◈ <span>Announcements</span></a>
+      <a class="nav-link" href="index.html">✦ <span>Services</span></a>
+      <a class="nav-link active" href="templates.html">▤ <span>Document Templates</span></a>
+      <a class="nav-link" href="index.html">▤ <span>Reports</span></a>
+      <a class="nav-link" href="index.html">◷ <span>Activity Log</span></a>
+    </nav>
+    <a id="logout" class="logout nav-link" href="index.html">↪ <span>Sign out</span></a>
+  </aside>
+
+  <main>
+    <header>
+      <button id="menu" class="icon" aria-label="Open menu">☰</button>
+      <div>
+        <p class="eyebrow">DOCUMENT CENTER</p>
+        <h2>Document Templates</h2>
+      </div>
+      <div class="header-right">
+        <span id="date"></span>
+        <span class="avatar">A</span>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="welcome">
+        <div>
+          <h1>Barangay Document Templates</h1>
+          <div class="muted">Download editable templates for common barangay transactions.</div>
+        </div>
+        <a class="btn" href="index.html">← Back to Dashboard</a>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h3>Available Templates</h3>
+            <div class="muted" style="margin-top:5px;font-size:13px">Select a document template to download.</div>
+          </div>
+        </div>
+        <section class="template-grid">
+          <article class="template-card">
+            <div class="template-icon">▣</div>
+            <div>
+              <span class="template-type">Certificate</span>
+              <h2>Barangay Clearance</h2>
+              <p>Basic clearance template with resident and purpose fields.</p>
+              <a class="btn primary" download href="templates/barangay-clearance-template.txt">Download Template</a>
+            </div>
+          </article>
+          <article class="template-card">
+            <div class="template-icon">▤</div>
+            <div>
+              <span class="template-type">Certificate</span>
+              <h2>Certificate of Residency</h2>
+              <p>Template for confirming a resident's barangay residency.</p>
+              <a class="btn primary" download href="templates/certificate-of-residency-template.txt">Download Template</a>
+            </div>
+          </article>
+          <article class="template-card">
+            <div class="template-icon">▤</div>
+            <div>
+              <span class="template-type">Certificate</span>
+              <h2>Certificate of Indigency</h2>
+              <p>Basic template for requests involving financial assistance.</p>
+              <a class="btn primary" download href="templates/certificate-of-indigency-template.txt">Download Template</a>
+            </div>
+          </article>
+          <article class="template-card">
+            <div class="template-icon">▣</div>
+            <div>
+              <span class="template-type">Clearance</span>
+              <h2>Barangay Business Clearance</h2>
+              <p>Template for documenting a barangay business clearance request.</p>
+              <a class="btn primary" download href="templates/business-clearance-template.txt">Download Template</a>
+            </div>
+          </article>
+        </section>
+      </div>
+
+      <div class="template-note">
+        <strong>Note:</strong> These are general editable templates. Review them against your barangay's current requirements, local forms, fees, and applicable regulations before official use.
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const menu=document.getElementById('menu');
+const sidebar=document.getElementById('sidebar');
+const date=document.getElementById('date');
+menu.onclick=()=>sidebar.classList.toggle('open');
+date.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+document.querySelectorAll('.nav-link').forEach(link=>link.addEventListener('click',()=>sidebar.classList.remove('open')));
+</script>
 </body>
 </html>
