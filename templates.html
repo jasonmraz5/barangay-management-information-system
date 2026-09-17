@@ -17,6 +17,10 @@
 .template-form label{display:grid;gap:7px;font-weight:600;font-size:14px}
 .template-form input,.template-form select,.template-form textarea{width:100%;box-sizing:border-box;border:1px solid #d7dee7;border-radius:10px;padding:11px 12px;font:inherit;background:#fff}
 .template-form textarea{min-height:150px;resize:vertical}
+.template-upload{border:1.5px dashed #cbd5e1;border-radius:12px;padding:16px;background:#f8fafc}
+.template-upload input{border:0;padding:0;background:transparent}
+.template-upload-note{font-size:12px;color:#64748b;margin-top:6px;font-weight:400}
+.template-file-name{font-size:13px;color:#166534;margin-top:7px;font-weight:500}
 .template-form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
 .template-close{border:0;background:transparent;font-size:24px;cursor:pointer;line-height:1;padding:2px 6px}
 @media(max-width:700px){.template-actions{width:100%;}.template-actions .btn{width:100%;justify-content:center}.template-modal-card{padding:22px}.template-form-actions{flex-direction:column-reverse}.template-form-actions .btn{width:100%;justify-content:center}}
@@ -61,7 +65,6 @@
           <div class="muted">Download editable templates for common barangay transactions.</div>
         </div>
         <div class="template-actions">
-          <a class="btn" href="index.html">← Back to Dashboard</a>
           <button class="btn primary" id="addTemplateBtn" type="button">＋ Add Document Template</button>
         </div>
       </div>
@@ -145,6 +148,13 @@
       <label>Description
         <input id="templateDescription" required placeholder="Short description of the template">
       </label>
+      <label>Upload Template File
+        <div class="template-upload">
+          <input id="templateFile" type="file" accept=".txt,.html,.htm,.doc,.docx,.pdf">
+          <div class="template-upload-note">Upload a document file. The selected file will be stored in this browser for the current demo.</div>
+          <div class="template-file-name" id="templateFileName">No file selected</div>
+        </div>
+      </label>
       <label>Template Content
         <textarea id="templateContent" required placeholder="Enter the document content and fields here..."></textarea>
       </label>
@@ -166,6 +176,8 @@ const grid=document.getElementById('templateGrid');
 const addBtn=document.getElementById('addTemplateBtn');
 const closeBtn=document.getElementById('closeTemplateModal');
 const cancelBtn=document.getElementById('cancelTemplate');
+const fileInput=document.getElementById('templateFile');
+const fileName=document.getElementById('templateFileName');
 const storageKey='bmis-document-templates-v1';
 
 menu.onclick=()=>sidebar.classList.toggle('open');
@@ -173,12 +185,13 @@ date.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'
 document.querySelectorAll('.nav-link').forEach(link=>link.addEventListener('click',()=>sidebar.classList.remove('open')));
 
 function openModal(){modal.classList.add('show');modal.setAttribute('aria-hidden','false');setTimeout(()=>document.getElementById('templateName').focus(),50)}
-function closeModal(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');form.reset()}
+function closeModal(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');form.reset();fileName.textContent='No file selected'}
 addBtn.onclick=openModal;
 closeBtn.onclick=closeModal;
 cancelBtn.onclick=closeModal;
 modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('show'))closeModal()});
+fileInput.addEventListener('change',()=>{fileName.textContent=fileInput.files[0]?fileInput.files[0].name:'No file selected'});
 
 function getCustomTemplates(){try{return JSON.parse(localStorage.getItem(storageKey)||'[]')}catch{return[]}}
 function saveCustomTemplates(items){localStorage.setItem(storageKey,JSON.stringify(items))}
@@ -191,6 +204,11 @@ function addCustomCard(item){
   article.querySelector('h2').textContent=item.name;
   article.querySelector('p').textContent=item.description;
   article.querySelector('.download-custom').onclick=()=>{
+    if(item.fileData&&item.fileName){
+      const link=document.createElement('a');
+      link.href=item.fileData;link.download=item.fileName;link.click();
+      return;
+    }
     const blob=new Blob([item.content],'text/plain;charset=utf-8');
     const url=URL.createObjectURL(blob);
     const link=document.createElement('a');
@@ -203,9 +221,20 @@ function addCustomCard(item){
 getCustomTemplates().forEach(addCustomCard);
 form.addEventListener('submit',e=>{
   e.preventDefault();
+  const file=fileInput.files[0];
   const item={name:document.getElementById('templateName').value.trim(),type:document.getElementById('templateType').value,description:document.getElementById('templateDescription').value.trim(),content:document.getElementById('templateContent').value.trim()};
   if(!item.name||!item.description||!item.content)return;
-  const items=getCustomTemplates();items.push(item);saveCustomTemplates(items);addCustomCard(item);closeModal();
+  if(file){
+    const reader=new FileReader();
+    reader.onload=()=>{
+      item.fileData=reader.result;
+      item.fileName=file.name;
+      const items=getCustomTemplates();items.push(item);saveCustomTemplates(items);addCustomCard(item);closeModal();
+    };
+    reader.readAsDataURL(file);
+  }else{
+    const items=getCustomTemplates();items.push(item);saveCustomTemplates(items);addCustomCard(item);closeModal();
+  }
 });
 </script>
 </body>
