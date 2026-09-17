@@ -25,6 +25,18 @@ pwd:[
 ['Mario Valdez',31,'Male','Single','HH-021','09170002009','Active','PWD','Eligible'],
 ['Liza Fernandez',39,'Female','Married','HH-022','09170002010','Active','PWD','Eligible']
 ],
+fourps:[
+['Alma Reyes',48,'Female','Married','HH-033','09170004001','Active','None','Eligible'],
+['Bernardo Cruz',54,'Male','Married','HH-034','09170004002','Active','None','Eligible'],
+['Clara Mendoza',39,'Female','Single','HH-035','09170004003','Active','None','Eligible'],
+['Domingo Garcia',57,'Male','Married','HH-036','09170004004','Active','None','Eligible'],
+['Estela Santos',45,'Female','Widowed','HH-037','09170004005','Active','None','Eligible'],
+['Felipe Navarro',52,'Male','Married','HH-038','09170004006','Active','None','Eligible'],
+['Gloria Ramos',43,'Female','Separated','HH-039','09170004007','Active','None','Eligible'],
+['Hector Flores',49,'Male','Married','HH-040','09170004008','Active','None','Eligible'],
+['Isabel Aquino',36,'Female','Single','HH-041','09170004009','Active','None','Eligible'],
+['Julio Bautista',58,'Male','Married','HH-042','09170004010','Active','None','Eligible']
+],
 solo:[
 ['Angela Rivera',33,'Female','Single','HH-023','09170003001','Active','Solo Parent','Eligible'],
 ['Maricel Gomez',40,'Female','Separated','HH-024','09170003002','Active','Solo Parent','Eligible'],
@@ -111,4 +123,12 @@ function form(type,item={}){const fields={resident:[['name','Full Name'],['age',
 function openModal(type,id=null){const map={resident:'residents',household:'households',document:'documents',official:'officials',announcement:'announcements',service:'services'},collection=map[type],item=id?db[collection].find(x=>x.id===id):{};$('#modalTitle').textContent=(id?'Edit ':'Add ')+type[0].toUpperCase()+type.slice(1);$('#modalBody').innerHTML=`<form onsubmit="saveRecord(event,'${type}',${id||0})">${form(type,item)}</form>`;$('#modal').classList.remove('hidden')}
 function closeModal(){$('#modal').classList.add('hidden')}function saveRecord(e,type,id){e.preventDefault();const map={resident:'residents',household:'households',document:'documents',official:'officials',announcement:'announcements',service:'services'},c=map[type],data=Object.fromEntries(new FormData(e.target).entries());Object.keys(data).forEach(k=>{if(k==='age'||k==='members')data[k]=Number(data[k])});if(id){const i=db[c].findIndex(x=>x.id===id);db[c][i]={...db[c][i],...data};log(`Updated ${type} record`)}else{data.id=Date.now();db[c].unshift(data);log(`Added ${type} record`)}save();closeModal();go(page);toast('Record saved successfully')}
 function editRecord(type,id){const map={residents:'resident',households:'household',documents:'document',officials:'official',announcements:'announcement',services:'service'};openModal(map[type],id)}function deleteRecord(type,id){if(!confirm('Delete this record?'))return;db[type].splice(db[type].findIndex(x=>x.id===id),1);log(`Deleted ${type} record`);save();go(page);toast('Record deleted')}
-$('#loginForm').addEventListener('submit',e=>{e.preventDefault();if($('#username').value==='admin'&&$('#password').value==='admin'){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');sessionStorage.setItem('bmis-auth','1');go('dashboard')}else $('#loginError').textContent='Invalid username or password.'});$('#logout').onclick=()=>{sessionStorage.removeItem('bmis-auth');$('#app').classList.add('hidden');$('#login').classList.remove('hidden')};$('#close').onclick=closeModal;$('#menu').onclick=()=>$('#sidebar').classList.toggle('open');$$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));$('#date').textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});if(sessionStorage.getItem('bmis-auth')){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');go('dashboard')}
+$('#loginForm').addEventListener('submit',e=>{e.preventDefault();if($('#username').value==='admin'&&$('#password').value==='admin'){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');sessionStorage.setItem('bmis-auth','1');go('dashboard')}else $('#loginError').textContent='Invalid username or password.'});$('#logout').onclick=()=>{sessionStorage.removeItem('bmis-auth');$('#app').classList.add('hidden');$('#login').classList.remove('hidden')};$('#close').onclick=closeModal;$('#menu').onclick=()=>$('#sidebar').classList.toggle('open');$$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));const residentToggle=document.querySelector('.resident-toggle');
+const residentSubnav=document.querySelector('.resident-subnav');
+function toggleResidents(){
+  const open=residentSubnav.classList.toggle('collapsed');
+  residentToggle.setAttribute('aria-expanded',String(!open));
+  residentToggle.classList.toggle('expanded',!open);
+}
+if(residentToggle){residentToggle.onclick=()=>{go('residents');toggleResidents()};}
+$('#date').textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});if(sessionStorage.getItem('bmis-auth')){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');go('dashboard')}
