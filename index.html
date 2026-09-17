@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Barangay Management Information System">
+  <title>Barangay Management Information System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="login" class="login-wrap">
+  <div class="login-card">
+    <div class="logo">BM</div><h1>Barangay Management</h1><p>Information System</p>
+    <form id="loginForm"><label>Username<input id="username" required autocomplete="username"></label><label>Password<input id="password" type="password" required autocomplete="current-password"></label><div id="loginError" class="error"></div><button class="btn primary full">Sign in</button></form>
+    <small>Demo credentials: <b>admin</b> / <b>admin</b></small>
+  </div>
+</div>
+<div id="app" class="hidden">
+  <aside class="sidebar" id="sidebar"><div class="brand"><div class="logo sm">BM</div><div><b>Barangay MIS</b><small>Management Portal</small></div></div>
+    <nav>
+      <button data-page="dashboard" class="active">▦ <span>Dashboard</span></button><button data-page="residents">♙ <span>Residents</span></button><button data-page="households">⌂ <span>Households</span></button><button data-page="documents">▤ <span>Documents</span></button><button data-page="officials">♟ <span>Officials</span></button><button data-page="announcements">⚑ <span>Announcements</span></button><button data-page="services">✦ <span>Barangay Services</span></button><button data-page="reports">▥ <span>Reports</span></button><button data-page="activity">◷ <span>Activity Log</span></button>
+    </nav><button id="logout" class="logout">↪ <span>Logout</span></button>
+  </aside>
+  <main><header><button id="menu" class="icon">☰</button><div><small id="kicker">Overview</small><h2 id="title">Dashboard</h2></div><div class="header-right"><span id="date"></span><span class="avatar">A</span></div></header><section id="content"></section></main>
+</div>
+<div id="modal" class="modal hidden"><div class="shade"></div><div class="modal-card"><div class="modal-head"><h3 id="modalTitle"></h3><button id="close" class="icon">×</button></div><div id="modalBody"></div></div></div>
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body></html>
