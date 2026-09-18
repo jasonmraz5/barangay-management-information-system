@@ -249,10 +249,10 @@ function closeModal(){$('#modal').classList.add('hidden')}function saveRecord(e,
 function editRecord(type,id){const map={payments:'payment',residents:'resident',households:'household',documents:'document',officials:'official',announcements:'announcement',services:'service'};openModal(map[type],id)}function deleteRecord(type,id){if(!confirm('Delete this record?'))return;db[type].splice(db[type].findIndex(x=>x.id===id),1);log(`Deleted ${type} record`);save();go(page);toast('Record deleted')}
 $('#logout').onclick=()=>{sessionStorage.removeItem('bmis-auth');$('#app').classList.add('hidden');$('#login').classList.remove('hidden')};$('#close').onclick=closeModal;$('#menu').onclick=()=>$('#sidebar').classList.toggle('open');
 function closeNavGroups(except){
-  $('.nav-group-toggle').forEach(button=>{
+  document.querySelectorAll('.nav-group-toggle').forEach(button=>{
     if(button===except)return;
     const group=button.dataset.group;
-    const sub=group?document.querySelector('[data-subnav="'+group+'"]'):null;
+    const sub=document.querySelector('[data-subnav="'+group+'"]');
     if(!sub)return;
     sub.classList.add('collapsed');
     button.classList.remove('expanded');
@@ -261,33 +261,44 @@ function closeNavGroups(except){
 }
 function toggleNavGroup(button){
   const group=button.dataset.group;
-  const sub=group?document.querySelector('[data-subnav="'+group+'"]'):null;
+  const sub=document.querySelector('[data-subnav="'+group+'"]');
   if(!sub)return;
-  const willOpen=sub.classList.contains('collapsed');
-  if(willOpen)closeNavGroups(button);
-  sub.classList.toggle('collapsed',!willOpen);
-  button.classList.toggle('expanded',willOpen);
-  button.setAttribute('aria-expanded',String(willOpen));
+  const isOpen=!sub.classList.contains('collapsed');
+  if(isOpen){
+    sub.classList.add('collapsed');
+    button.classList.remove('expanded');
+    button.setAttribute('aria-expanded','false');
+  }else{
+    closeNavGroups(button);
+    sub.classList.remove('collapsed');
+    button.classList.add('expanded');
+    button.setAttribute('aria-expanded','true');
+  }
 }
-$('.nav-group-toggle').forEach(button=>{
+document.querySelectorAll('.nav-group-toggle').forEach(button=>{
   button.type='button';
-  button.onclick=()=>toggleNavGroup(button);
+  button.addEventListener('click',event=>{
+    event.preventDefault();
+    event.stopPropagation();
+    toggleNavGroup(button);
+  });
 });
-$('nav button[data-page]:not(.nav-group-toggle)').forEach(button=>{
+document.querySelectorAll('nav button[data-page]:not(.nav-group-toggle)').forEach(button=>{
   button.type='button';
-  button.onclick=()=>{
-    go(button.dataset.page);
+  button.addEventListener('click',event=>{
+    event.preventDefault();
+    const page=button.dataset.page;
     const parent=button.closest('.nav-subnav');
-    const group=parent?.dataset.subnav;
-    if(group){
-      const parentToggle=document.querySelector('.nav-group-toggle[data-group="'+group+'"]');
+    if(parent){
+      const parentToggle=document.querySelector('.nav-group-toggle[data-group="'+parent.dataset.subnav+'"]');
+      if(parentToggle)closeNavGroups(parentToggle);
+      parent.classList.remove('collapsed');
       if(parentToggle){
-        closeNavGroups(parentToggle);
-        parent.classList.remove('collapsed');
         parentToggle.classList.add('expanded');
         parentToggle.setAttribute('aria-expanded','true');
       }
     }
-  };
+    go(page);
+  });
 });
 $('#date').textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});if(sessionStorage.getItem('bmis-auth')){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');go('dashboard')}
