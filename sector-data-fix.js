@@ -21,7 +21,7 @@
   }
 
   function normalizeResidents(){
-    if(!window.db || !Array.isArray(db.residents))return false;
+    if(typeof db==='undefined' || !Array.isArray(db.residents))return false;
     let changed=false;
     db.residents.forEach(r=>{
       const age=Number(r.age)||0;
@@ -69,7 +69,7 @@
     const tests={senior:isSenior,pwd:isPwd,solo:isSolo,fourps:isFourPsEligible};
     const rows=(db.residents||[]).filter(tests[kind]||(()=>false));
     const label=labels[kind]||kind;
-    return `${summary}<div class="welcome"><div><h1>${label}</h1><div class="muted">Special sector registry and monitoring.</div></div><button class="btn primary" onclick="openModal('resident')">+ Add Resident</button></div>
+    return `<div class="welcome"><div><h1>${label}</h1><div class="muted">Special sector registry and monitoring.</div></div><button class="btn primary" onclick="openModal('resident')">+ Add Resident</button></div>
 <div class="cards sector-cards"><div class="stat"><div class="label">Registered</div><strong>${rows.length}</strong><span>${label}</span></div><div class="stat"><div class="label">Households</div><strong>${new Set(rows.map(x=>x.household).filter(Boolean)).size}</strong><span>Households represented</span></div></div>
 <div class="panel"><div class="panel-head"><h3>${label} Registry</h3></div>${table(['Name','Age','Sex','Household','Contact','Sector','4Ps','Status','Actions'],rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${x.age}</td><td>${esc(x.sex)}</td><td>${esc(x.household)}</td><td>${esc(x.contact)}</td><td>${esc(x.sector||SECTOR_NONE)}</td><td>${badge(x.fourPs||'Not Eligible')}</td><td>${badge(x.status)}</td><td>${actions('residents',x.id)}</td></tr>`).join(''))}</div>`;
   };
