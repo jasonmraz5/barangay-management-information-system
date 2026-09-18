@@ -99,8 +99,91 @@ ${section('Service Fee Schedule','Configured fees from the services directory',t
 `;
   }
 
+  const reportSamples={
+    residents:[
+      ['RPT-R001','Maria Santos','Senior Citizen','Senior','Purok 1','Active'],
+      ['RPT-R002','Juan Dela Cruz','PWD','Non-Senior','Purok 2','Active'],
+      ['RPT-R003','Ana Reyes','Solo Parent','Non-Senior','Purok 3','Active'],
+      ['RPT-R004','Pedro Garcia','4Ps Eligible','Non-Senior','Purok 4','Active'],
+      ['RPT-R005','Rosa Mendoza','Senior Citizen','Senior','Purok 5','Active'],
+      ['RPT-R006','Carlos Bautista','PWD','Non-Senior','Purok 1','Active'],
+      ['RPT-R007','Liza Navarro','Solo Parent','Non-Senior','Purok 2','Active'],
+      ['RPT-R008','Jose Ramos','4Ps Eligible','Non-Senior','Purok 3','Active'],
+      ['RPT-R009','Elena Torres','Senior Citizen','Senior','Purok 4','Active'],
+      ['RPT-R010','Mark Villanueva','None','Non-Senior','Purok 5','Active']
+    ],
+    community:[
+      ['COM-001','Purok 1','Households','24','Active'],
+      ['COM-002','Purok 2','Households','31','Active'],
+      ['COM-003','Purok 3','Households','19','Active'],
+      ['COM-004','Purok 4','Households','27','Active'],
+      ['COM-005','Purok 5','Households','22','Active'],
+      ['COM-006','Senior Citizens','Residents','18','Registered'],
+      ['COM-007','PWD','Residents','9','Registered'],
+      ['COM-008','Solo Parents','Residents','11','Registered'],
+      ['COM-009','4Ps Eligible','Residents','16','Registered'],
+      ['COM-010','Community Programs','Programs','5','Active']
+    ],
+    transactions:[
+      ['TRX-001','Barangay Clearance','Juan Dela Cruz','2026-09-01','Paid'],
+      ['TRX-002','Certificate of Residency','Maria Santos','2026-09-02','Paid'],
+      ['TRX-003','Certificate of Indigency','Ana Reyes','2026-09-03','Pending'],
+      ['TRX-004','Business Clearance','Pedro Garcia','2026-09-04','Paid'],
+      ['TRX-005','Barangay ID','Rosa Mendoza','2026-09-05','Released'],
+      ['TRX-006','Certificate of Residency','Carlos Bautista','2026-09-06','Paid'],
+      ['TRX-007','Barangay Clearance','Liza Navarro','2026-09-07','Pending'],
+      ['TRX-008','Certificate of Indigency','Jose Ramos','2026-09-08','Paid'],
+      ['TRX-009','Barangay ID','Elena Torres','2026-09-09','Released'],
+      ['TRX-010','Business Clearance','Mark Villanueva','2026-09-10','Paid']
+    ],
+    financial:[
+      ['FIN-001','Barangay Clearance','PHP 50','Cash','Paid','2026-09-01'],
+      ['FIN-002','Certificate of Residency','PHP 30','Cash','Paid','2026-09-02'],
+      ['FIN-003','Certificate of Indigency','PHP 0','Waived','Waived','2026-09-03'],
+      ['FIN-004','Business Clearance','PHP 100','Cash','Paid','2026-09-04'],
+      ['FIN-005','Barangay ID','PHP 75','GCash','Paid','2026-09-05'],
+      ['FIN-006','Certificate of Residency','PHP 30','GCash','Paid','2026-09-06'],
+      ['FIN-007','Barangay Clearance','PHP 50','Cash','Pending','2026-09-07'],
+      ['FIN-008','Certificate of Indigency','PHP 0','Waived','Waived','2026-09-08'],
+      ['FIN-009','Barangay ID','PHP 75','Cash','Paid','2026-09-09'],
+      ['FIN-010','Business Clearance','PHP 100','GCash','Paid','2026-09-10']
+    ],
+    overview:[
+      ['OV-001','Residents','Registered population','250','September 2026'],
+      ['OV-002','Households','Registered households','123','September 2026'],
+      ['OV-003','Documents','Processed requests','87','September 2026'],
+      ['OV-004','Payments','Payment records','64','September 2026'],
+      ['OV-005','Collections','Paid collections','PHP 4,850','September 2026'],
+      ['OV-006','Senior Citizens','Registered sector','38','September 2026'],
+      ['OV-007','PWD','Registered sector','14','September 2026'],
+      ['OV-008','Solo Parents','Registered sector','21','September 2026'],
+      ['OV-009','4Ps Eligible','Eligible residents','29','September 2026'],
+      ['OV-010','Programs','Active programs','4','September 2026']
+    ]
+  };
+
+  function sampleTable(kind){
+    const heads={
+      residents:['Report ID','Resident','Sector','Status','Area','Record Status'],
+      community:['Report ID','Community / Group','Type','Count','Status'],
+      transactions:['Transaction ID','Transaction','Resident','Date','Status'],
+      financial:['Financial ID','Item','Amount','Method','Status','Date'],
+      overview:['Report ID','Metric','Description','Value','Period']
+    };
+    return table(heads[kind],reportSamples[kind].map(row=>'<tr>'+row.map((v,i)=>'<td>'+ (i===0?'<b>'+escHtml(v)+'</b>':pill(v))+'</td>').join('')+'</tr>').join(''));
+  }
+
+  function reportOverview(){
+    const rows=reportSamples.overview;
+    return `<div class="welcome"><div><h1>Reports Overview</h1><div class="muted">Summary of key barangay management indicators.</div></div>${printButton()}</div><div class="report-card-grid">${rows.slice(0,6).map(x=>card(x[1],x[3],x[2])).join('')}</div>${section('Overview Report Samples','Sample report records for the dashboard and management summary',sampleTable('overview'))}`;
+  }
+
   function reportPage(kind){
-    return ({resident:residentReport,community:communityReport,transaction:transactionReport,financial:financialReport}[kind]||residentReport)();
+    const pages={resident:residentReport,community:communityReport,transaction:transactionReport,financial:financialReport,overview:reportOverview};
+    const html=(pages[kind]||residentReport)();
+    const sampleKind={resident:'residents',community:'community',transaction:'transactions',financial:'financial'}[kind];
+    return sampleKind ? html+section('Sample Report Records','10 sample records for testing and presentation',sampleTable(sampleKind)) : html;
+
   }
 
   window.openProgramModal=function(id=null){
@@ -158,12 +241,12 @@ ${section('Program Registry','Manage ongoing and planned barangay programs',tabl
 
   const originalGo=window.go;
   window.go=function(p){
-    if(['residentReports','communityReports','transactionReports','financialReports'].includes(p)){
+    if(['residentReports','communityReports','transactionReports','financialReports','reports'].includes(p)){
       document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
-      const titles={residentReports:'Resident Reports',communityReports:'Community Reports',transactionReports:'Transaction Reports',financialReports:'Financial Reports'};
+      const titles={residentReports:'Resident Reports',communityReports:'Community Reports',transactionReports:'Transaction Reports',financialReports:'Financial Reports',reports:'Reports Overview'};
       document.getElementById('title').textContent=titles[p];
       document.getElementById('kicker').textContent='REPORTS';
-      document.getElementById('content').innerHTML=reportPage(p.replace('Reports','').toLowerCase()==='resident'?'resident':p.replace('Reports','').toLowerCase());
+      document.getElementById('content').innerHTML=reportPage(p==='reports'?'overview':p.replace('Reports','').toLowerCase());
       document.getElementById('sidebar').classList.remove('open');
       return;
     }
