@@ -38,7 +38,7 @@
   }
   function dashboardBudget(){
     const content=document.getElementById('content');if(!content||content.querySelector('[data-budget-dashboard]'))return;
-    const heading=content.querySelector('h1,h2');if(!heading||!/dashboard/i.test(heading.textContent||''))return;
+    const title=document.getElementById('title');if(!title||!/dashboard/i.test(title.textContent||''))return;
     const wrap=document.createElement('div');wrap.dataset.budgetDashboard='1';wrap.innerHTML=budgetPie();content.appendChild(wrap);
   }
   function modal(title,fields,saveFn){
