@@ -65,7 +65,6 @@
   }
 
   function loadReportsPrograms(){
-    installReportsProgramsNav();
     if(!document.querySelector('link[data-reports-programs-style]')){
       const link=document.createElement('link');
       link.rel='stylesheet';
@@ -73,12 +72,16 @@
       link.dataset.reportsProgramsStyle='1';
       document.head.appendChild(link);
     }
-    if(!document.querySelector('script[data-reports-programs-script]')){
-      const script=document.createElement('script');
-      script.src='reports-programs.js?v=20260918-reports-programs';
-      script.dataset.reportsProgramsScript='1';
-      document.body.appendChild(script);
+    const existing=document.querySelector('script[data-reports-programs-script]');
+    if(existing){
+      installReportsProgramsNav();
+      return;
     }
+    const script=document.createElement('script');
+    script.src='reports-programs.js?v=20260918-reports-programs';
+    script.dataset.reportsProgramsScript='1';
+    script.onload=installReportsProgramsNav;
+    document.body.appendChild(script);
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadReportsPrograms);
