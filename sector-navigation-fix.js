@@ -24,7 +24,7 @@
 })();
 
 (function(){
-  function installReportsProgramsNav(){
+  function installReportsNav(){
     const group=document.querySelector('.nav-group-toggle[data-group="insights"]');
     const sub=document.querySelector('[data-subnav="insights"]');
     if(group&&sub){
@@ -47,24 +47,9 @@
         });
       }
     }
-    const management=document.querySelector('[data-subnav="management"]');
-    if(management&&!management.querySelector('button[data-page="programs"]')){
-      const link=management.querySelector('a.nav-link');
-      const button=document.createElement('button');
-      button.type='button';
-      button.dataset.page='programs';
-      button.innerHTML='◒ <span>Programs</span>';
-      if(link)management.insertBefore(button,link);else management.appendChild(button);
-      button.addEventListener('click',event=>{
-        event.preventDefault();
-        const parentToggle=document.querySelector('.nav-group-toggle[data-group="management"]');
-        if(parentToggle&&typeof closeNavGroups==='function')closeNavGroups(parentToggle);
-        if(typeof window.go==='function')window.go('programs');
-      });
-    }
   }
 
-  function loadReportsPrograms(){
+  function loadReports(){
     if(!document.querySelector('link[data-reports-programs-style]')){
       const link=document.createElement('link');
       link.rel='stylesheet';
@@ -74,14 +59,14 @@
     }
     const existing=document.querySelector('script[data-reports-programs-script]');
     if(existing){
-      installReportsProgramsNav();
+      installReportsNav();
       return;
     }
     const script=document.createElement('script');
     script.src='reports-programs.js?v=20260918-reports-programs';
     script.dataset.reportsProgramsScript='1';
     script.onload=()=>{
-      installReportsProgramsNav();
+      installReportsNav();
       if(!document.querySelector('script[data-dashboard-graph]')){
         const graph=document.createElement('script');
         graph.src='dashboard-graph.js?v=20260918-dashboard-graph';
@@ -92,6 +77,6 @@
     document.body.appendChild(script);
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadReportsPrograms);
-  else loadReportsPrograms();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadReports);
+  else loadReports();
 })();
