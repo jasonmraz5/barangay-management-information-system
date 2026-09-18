@@ -99,6 +99,21 @@ return `<div class="analytics-grid">
 <div class="metric-row"><span>Solo Parents</span><b>${sectors.solo}</b><div class="bar"><i style="width:${sectors.solo/max*100}%"></i></div></div><div class="metric-row"><span>4Ps Eligible</span><b>${sectors.fourPs}</b><div class="bar"><i style="width:${sectors.fourPs/max*100}%"></i></div></div>
 </div></div>`;
 }
+function paymentDashboard(){
+  const groups={};
+  db.payments.forEach(x=>{const d=x.date||'No date';groups[d]=(groups[d]||0)+(x.status==='Paid'?Number(x.amount||0):0)});
+  const dates=Object.keys(groups).sort().slice(-7);
+  const values=dates.map(d=>groups[d]);
+  const max=Math.max(...values,1);
+  const totalPaid=db.payments.filter(x=>x.status==='Paid').reduce((n,x)=>n+Number(x.amount||0),0);
+  const pending=db.payments.filter(x=>x.status==='Pending').reduce((n,x)=>n+Number(x.amount||0),0);
+  const paidCount=db.payments.filter(x=>x.status==='Paid').length;
+  const paymentBars=dates.map(d=>{const value=groups[d];const height=Math.max(value/max*100,value?8:2);return \`<div class="payment-bar-item"><div class="payment-bar-value">PHP \${value.toLocaleString()}</div><div class="payment-bar-track"><i style="height:\${height}%"></i></div><small>\${esc(d)}</small></div>\`}).join('');
+  const methods={};db.payments.forEach(x=>{methods[x.method]=(methods[x.method]||0)+1});
+  const methodRows=Object.entries(methods).sort((a,b)=>b[1]-a[1]).map(([name,count])=>\`<div class="insight-row"><span>\${esc(name)}</span><b>\${count}</b></div>\`).join('');
+  return \`<div class="dashboard-insights"><div class="panel payment-chart"><div class="panel-head"><div><h3>Payment Records</h3><div class="muted">Paid collections by date</div></div><button class="mini" onclick="go('payments')">View records</button></div><div class="payment-chart-total"><strong>PHP \${totalPaid.toLocaleString()}</strong><span>Total collected</span></div><div class="payment-bars">\${paymentBars||'<div class="empty">No payment records yet.</div>'}</div></div><div class="panel dashboard-analytics"><div class="panel-head"><div><h3>Payment Analytics</h3><div class="muted">Collection performance</div></div></div><div class="insight-grid"><div><span>Paid records</span><strong>\${paidCount}</strong></div><div><span>Pending amount</span><strong>PHP \${pending.toLocaleString()}</strong></div><div><span>Waived</span><strong>\${db.payments.filter(x=>x.status==='Waived').length}</strong></div><div><span>Methods used</span><strong>\${Object.keys(methods).length}</strong></div></div><div class="insight-list"><h4>Payment Methods</h4>\${methodRows||'<div class="empty">No payment methods recorded.</div>'}</div></div></div>\
+<div class="section-heading"><div><h2>Reports Overview</h2><div class="muted">Quick administrative metrics from the current records.</div></div><button class="mini" onclick="go('reports')">Open Reports</button></div><div class="report-grid dashboard-report-grid">\${[['Residents','Registered residents',db.residents.length],['Households','Registered households',db.households.length],['Documents','Document requests',db.documents.length],['Payments','Payment records',db.payments.length],['Collected','Paid amount','PHP '+totalPaid.toLocaleString()],['Services','Active services',db.services.filter(x=>x.status==='Active').length]].map(x=>\`<div class="report-card"><div class="report-kicker">\${x[0]}</div><p>\${x[1]}</p><strong>\${x[2]}</strong></div>\`).join('')}</div>\`;
+}
 function sectorPage(kind){
 const labels={senior:'Senior Citizens',pwd:'Persons with Disabilities (PWD)',solo:'Solo Parents',fourps:'4Ps Eligible Residents'};
 const test={senior:x=>Number(x.age)>=60||/senior/i.test(x.status)||/senior/i.test(x.sector||''),pwd:x=>/pwd|person with disability/i.test(x.sector||''),solo:x=>/solo parent/i.test(x.sector||''),fourps:x=>/eligible/i.test(x.fourPs||'')}[kind];
