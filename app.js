@@ -196,19 +196,6 @@ function toggleNavGroup(button){
   button.classList.toggle('expanded',willOpen);
   button.setAttribute('aria-expanded',String(willOpen));
 }
-$('.nav-group-toggle').forEach(button=>{
-  button.onclick=()=>{
-    if(button.classList.contains('resident-toggle')){
-      go('residents');
-      const sub=button.nextElementSibling;
-      const willOpen=sub.classList.contains('collapsed');
-      sub.classList.toggle('collapsed',!willOpen);
-      button.classList.toggle('expanded',willOpen);
-      button.setAttribute('aria-expanded',String(willOpen));
-      return;
-    }
-    toggleNavGroup(button);
-  };
-});
+$('.nav-group-toggle').forEach(button=>button.onclick=()=>toggleNavGroup(button));
 $('nav button[data-page]:not(.nav-group-toggle)').forEach(button=>button.onclick=()=>go(button.dataset.page));
 $('#date').textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});if(sessionStorage.getItem('bmis-auth')){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');go('dashboard')}
