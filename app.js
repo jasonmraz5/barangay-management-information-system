@@ -1,4 +1,22 @@
 const KEY='bmis-data-v1';
+
+function handleLogin(e){
+  e.preventDefault();
+  const username=(document.getElementById('username')?.value||'').trim();
+  const password=document.getElementById('password')?.value||'';
+  const error=document.getElementById('loginError');
+  if(username==='admin'&&password==='admin'){
+    sessionStorage.setItem('bmis-auth','1');
+    document.getElementById('login')?.classList.add('hidden');
+    document.getElementById('app')?.classList.remove('hidden');
+    if(error)error.textContent='';
+    if(typeof go==='function')go('dashboard');
+  }else if(error){
+    error.textContent='Invalid username or password.';
+  }
+}
+
+document.getElementById('loginForm')?.addEventListener('submit',handleLogin);
 const seed={residents:[{id:1,name:'Juan Dela Cruz',age:42,sex:'Male',civil:'Married',household:'HH-001',contact:'09171234567',status:'Active',sector:'None',fourPs:'Not Eligible'},{id:2,name:'Maria Santos',age:35,sex:'Female',civil:'Married',household:'HH-001',contact:'09181234567',status:'Active',sector:'Solo Parent',fourPs:'Eligible'},{id:3,name:'Pedro Reyes',age:68,sex:'Male',civil:'Widowed',household:'HH-002',contact:'09191234567',status:'Senior',sector:'Senior Citizen',fourPs:'Not Eligible'}],households:[{id:1,code:'HH-001',head:'Juan Dela Cruz',address:'Purok 1, Barangay Center',members:2,status:'Active'},{id:2,code:'HH-002',head:'Pedro Reyes',address:'Purok 3, Riverside',members:1,status:'Active'}],documents:[{id:1,type:'Barangay Clearance',applicant:'Juan Dela Cruz',date:'2026-09-15',status:'Issued'},{id:2,type:'Certificate of Residency',applicant:'Maria Santos',date:'2026-09-16',status:'Pending'}],officials:[{id:1,name:'Hon. Roberto Garcia',position:'Punong Barangay',term:'2023-2026',contact:'09170000001',status:'Active'},{id:2,name:'Ana Flores',position:'Barangay Secretary',term:'2023-2026',contact:'09170000002',status:'Active'}],payments:[{id:1,payer:'Juan Dela Cruz',purpose:'Barangay Clearance',amount:50,method:'Cash',reference:'PAY-0001',date:'2026-09-15',status:'Paid'},{id:2,payer:'Maria Santos',purpose:'Certificate of Residency',amount:30,method:'GCash',reference:'PAY-0002',date:'2026-09-16',status:'Paid'},{id:3,payer:'Pedro Reyes',purpose:'Certificate of Indigency',amount:0,method:'Free',reference:'PAY-0003',date:'2026-09-17',status:'Waived'},{id:4,payer:'Ana Garcia',purpose:'Business Permit',amount:500,method:'Bank Transfer',reference:'PAY-0004',date:'2026-09-17',status:'Paid'},{id:5,payer:'Roberto Cruz',purpose:'Barangay Clearance',amount:50,method:'GCash',reference:'PAY-0005',date:'2026-09-18',status:'Pending'},{id:6,payer:'Liza Mendoza',purpose:'Certificate of Residency',amount:30,method:'Cash',reference:'PAY-0006',date:'2026-09-18',status:'Paid'},{id:7,payer:'Carlos Aquino',purpose:'Certificate of Indigency',amount:0,method:'Free',reference:'PAY-0007',date:'2026-09-18',status:'Waived'},{id:8,payer:'Sofia Ramos',purpose:'Barangay Clearance',amount:50,method:'Cash',reference:'PAY-0008',date:'2026-09-18',status:'Cancelled'},{id:9,payer:'Miguel Torres',purpose:'Business Permit',amount:500,method:'GCash',reference:'PAY-0009',date:'2026-09-18',status:'Paid'},{id:10,payer:'Grace Villanueva',purpose:'Certificate of Residency',amount:30,method:'Bank Transfer',reference:'PAY-0010',date:'2026-09-18',status:'Paid'}],announcements:[{id:1,title:'Community Clean-up Drive',date:'2026-09-20',status:'Published',details:'All residents are encouraged to participate.'},{id:2,title:'Barangay Assembly',date:'2026-09-28',status:'Published',details:'Quarterly barangay assembly at the covered court.'}],services:[{id:1,name:'Barangay Clearance',category:'Certificates',fee:'₱50',status:'Active'},{id:2,name:'Certificate of Residency',category:'Certificates',fee:'₱30',status:'Active'},{id:3,name:'Certificate of Indigency',category:'Certificates',fee:'Free',status:'Active'},{id:4,name:'Business Clearance',category:'Permits',fee:'₱100',status:'Active'}],activity:[{id:1,action:'System initialized',user:'admin',date:new Date().toLocaleString()}]};
 const demoSectorSamples={
 senior:[
@@ -58,7 +76,9 @@ function ensureDemoSectorSamples(){
   });
   db.residents.forEach(x=>{if(!x.sector)x.sector='None';if(!x.fourPs)x.fourPs='Not Eligible';});
 }
-let db=JSON.parse(localStorage.getItem(KEY)||'null')||seed;
+let db=null;
+try{db=JSON.parse(localStorage.getItem(KEY)||'null')}catch(err){localStorage.removeItem(KEY)}
+db=db||JSON.parse(JSON.stringify(seed));
 ensureDemoSectorSamples();
 save();
 let page='dashboard';
@@ -186,7 +206,7 @@ function importResidents(){
 function openModal(type,id=null){const map={payment:'payments',resident:'residents',household:'households',document:'documents',official:'officials',announcement:'announcements',service:'services'},collection=map[type],item=id?db[collection].find(x=>x.id===id):{};$('#modalTitle').textContent=(id?'Edit ':'Add ')+type[0].toUpperCase()+type.slice(1);$('#modalBody').innerHTML=`<form onsubmit="saveRecord(event,'${type}',${id||0})">${form(type,item)}</form>`;$('#modal').classList.remove('hidden')}
 function closeModal(){$('#modal').classList.add('hidden')}function saveRecord(e,type,id){e.preventDefault();const map={payment:'payments',resident:'residents',household:'households',document:'documents',official:'officials',announcement:'announcements',service:'services'},c=map[type],data=Object.fromEntries(new FormData(e.target).entries());Object.keys(data).forEach(k=>{if(k==='age'||k==='members'||k==='amount')data[k]=Number(data[k])});if(id){const i=db[c].findIndex(x=>x.id===id);db[c][i]={...db[c][i],...data};log(`Updated ${type} record`)}else{data.id=Date.now();db[c].unshift(data);log(`Added ${type} record`);if(type==='document'){const svc=db.services.find(x=>x.name.toLowerCase()===String(data.type).toLowerCase());if(svc&&svc.fee!=='Free'){const amount=Number(String(svc.fee).replace(/[^0-9.]/g,''))||0;db.payments.unshift({id:Date.now()+1,payer:data.applicant,purpose:data.type,amount,method:'Cash',reference:`PAY-${String(Date.now()).slice(-6)}`,date:data.date,status:'Pending'});log(`Created pending payment for ${data.type}`)}}}save();closeModal();go(page);toast('Record saved successfully')}
 function editRecord(type,id){const map={payments:'payment',residents:'resident',households:'household',documents:'document',officials:'official',announcements:'announcement',services:'service'};openModal(map[type],id)}function deleteRecord(type,id){if(!confirm('Delete this record?'))return;db[type].splice(db[type].findIndex(x=>x.id===id),1);log(`Deleted ${type} record`);save();go(page);toast('Record deleted')}
-$('#loginForm').addEventListener('submit',e=>{e.preventDefault();if($('#username').value==='admin'&&$('#password').value==='admin'){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');sessionStorage.setItem('bmis-auth','1');go('dashboard')}else $('#loginError').textContent='Invalid username or password.'});$('#logout').onclick=()=>{sessionStorage.removeItem('bmis-auth');$('#app').classList.add('hidden');$('#login').classList.remove('hidden')};$('#close').onclick=closeModal;$('#menu').onclick=()=>$('#sidebar').classList.toggle('open');
+$('#logout').onclick=()=>{sessionStorage.removeItem('bmis-auth');$('#app').classList.add('hidden');$('#login').classList.remove('hidden')};$('#close').onclick=closeModal;$('#menu').onclick=()=>$('#sidebar').classList.toggle('open');
 function toggleNavGroup(button){
   const group=button.dataset.group;
   const sub=group?document.querySelector(`[data-subnav="${group}"]`):null;
