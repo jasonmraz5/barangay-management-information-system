@@ -63,7 +63,7 @@ ensureDemoSectorSamples();
 save();
 let page='dashboard';
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);function save(){localStorage.setItem(KEY,JSON.stringify(db))}function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2400)}function log(action){db.activity.unshift({id:Date.now(),action,user:'admin',date:new Date().toLocaleString()});db.activity=db.activity.slice(0,100);save()}
-function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}function badge(s){let c=/issued|active|published|senior/i.test(s)?'green':/pending/i.test(s)?'orange':'red';return `<span class="badge ${c}">${esc(s)}</span>`}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}function badge(s){let c=/issued|active|published|senior|paid/i.test(s)?'green':/pending/i.test(s)?'orange':'red';return `<span class="badge ${c}">${esc(s)}</span>`}
 function table(headers,rows){return `<div class="table-wrap"><table class="table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows||`<tr><td colspan="${headers.length}" class="empty">No records found.</td></tr>`}</tbody></table></div>`}
 function actions(type,id){return `<div class="actions"><button class="mini" onclick="editRecord('${type}',${id})">Edit</button><button class="mini" onclick="deleteRecord('${type}',${id})">Delete</button></div>`}
 function sectorCounts(){
