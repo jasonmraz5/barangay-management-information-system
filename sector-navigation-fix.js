@@ -80,7 +80,15 @@
     const script=document.createElement('script');
     script.src='reports-programs.js?v=20260918-reports-programs';
     script.dataset.reportsProgramsScript='1';
-    script.onload=installReportsProgramsNav;
+    script.onload=()=>{
+      installReportsProgramsNav();
+      if(!document.querySelector('script[data-dashboard-graph]')){
+        const graph=document.createElement('script');
+        graph.src='dashboard-graph.js?v=20260918-dashboard-graph';
+        graph.dataset.dashboardGraph='1';
+        document.body.appendChild(graph);
+      }
+    };
     document.body.appendChild(script);
   }
 
