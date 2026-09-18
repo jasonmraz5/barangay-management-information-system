@@ -248,15 +248,46 @@ function openModal(type,id=null){const map={payment:'payments',resident:'residen
 function closeModal(){$('#modal').classList.add('hidden')}function saveRecord(e,type,id){e.preventDefault();const map={payment:'payments',resident:'residents',household:'households',document:'documents',official:'officials',announcement:'announcements',service:'services'},c=map[type],data=Object.fromEntries(new FormData(e.target).entries());Object.keys(data).forEach(k=>{if(k==='age'||k==='members'||k==='amount')data[k]=Number(data[k])});if(id){const i=db[c].findIndex(x=>x.id===id);db[c][i]={...db[c][i],...data};log(`Updated ${type} record`)}else{data.id=Date.now();db[c].unshift(data);log(`Added ${type} record`);if(type==='document'){const svc=db.services.find(x=>x.name.toLowerCase()===String(data.type).toLowerCase());if(svc&&svc.fee!=='Free'){const amount=Number(String(svc.fee).replace(/[^0-9.]/g,''))||0;db.payments.unshift({id:Date.now()+1,payer:data.applicant,purpose:data.type,amount,method:'Cash',reference:`PAY-${String(Date.now()).slice(-6)}`,date:data.date,status:'Pending'});log(`Created pending payment for ${data.type}`)}}}save();closeModal();go(page);toast('Record saved successfully')}
 function editRecord(type,id){const map={payments:'payment',residents:'resident',households:'household',documents:'document',officials:'official',announcements:'announcement',services:'service'};openModal(map[type],id)}function deleteRecord(type,id){if(!confirm('Delete this record?'))return;db[type].splice(db[type].findIndex(x=>x.id===id),1);log(`Deleted ${type} record`);save();go(page);toast('Record deleted')}
 $('#logout').onclick=()=>{sessionStorage.removeItem('bmis-auth');$('#app').classList.add('hidden');$('#login').classList.remove('hidden')};$('#close').onclick=closeModal;$('#menu').onclick=()=>$('#sidebar').classList.toggle('open');
+function closeNavGroups(except){
+  $('.nav-group-toggle').forEach(button=>{
+    if(button===except)return;
+    const group=button.dataset.group;
+    const sub=group?document.querySelector('[data-subnav="'+group+'"]'):null;
+    if(!sub)return;
+    sub.classList.add('collapsed');
+    button.classList.remove('expanded');
+    button.setAttribute('aria-expanded','false');
+  });
+}
 function toggleNavGroup(button){
   const group=button.dataset.group;
-  const sub=group?document.querySelector(`[data-subnav="${group}"]`):null;
+  const sub=group?document.querySelector('[data-subnav="'+group+'"]'):null;
   if(!sub)return;
   const willOpen=sub.classList.contains('collapsed');
+  if(willOpen)closeNavGroups(button);
   sub.classList.toggle('collapsed',!willOpen);
   button.classList.toggle('expanded',willOpen);
   button.setAttribute('aria-expanded',String(willOpen));
 }
-$('.nav-group-toggle').forEach(button=>button.onclick=()=>toggleNavGroup(button));
-$('nav button[data-page]:not(.nav-group-toggle)').forEach(button=>button.onclick=()=>go(button.dataset.page));
+$('.nav-group-toggle').forEach(button=>{
+  button.type='button';
+  button.onclick=()=>toggleNavGroup(button);
+});
+$('nav button[data-page]:not(.nav-group-toggle)').forEach(button=>{
+  button.type='button';
+  button.onclick=()=>{
+    go(button.dataset.page);
+    const parent=button.closest('.nav-subnav');
+    const group=parent?.dataset.subnav;
+    if(group){
+      const parentToggle=document.querySelector('.nav-group-toggle[data-group="'+group+'"]');
+      if(parentToggle){
+        closeNavGroups(parentToggle);
+        parent.classList.remove('collapsed');
+        parentToggle.classList.add('expanded');
+        parentToggle.setAttribute('aria-expanded','true');
+      }
+    }
+  };
+});
 $('#date').textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});if(sessionStorage.getItem('bmis-auth')){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');go('dashboard')}
